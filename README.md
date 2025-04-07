@@ -40,7 +40,20 @@ A Redis module that provides session management functionality, integrated with t
 
 ## Integration
 
-The session manager module communicates with the custom hashmap module to store user keys and their associated session IDs. When a session is deleted, the corresponding entry in the custom hashmap is also removed.
+The project demonstrates two different approaches for integration between Redis modules:
+
+### 1. Using Redis Commands (Original Approach)
+
+The session manager module communicates with the custom hashmap module by executing Redis commands through the Redis command interface. When a session is created or deleted, the session manager calls the appropriate custom hashmap commands to manage the mapping between user keys and session IDs.
+
+### 2. Direct Module Communication (Enhanced Approach)
+
+The custom hashmap module exposes its storage through a C-compatible FFI (Foreign Function Interface), allowing other modules to directly access its functionality without going through the Redis command layer. The session manager module can load and call these functions directly, improving performance by eliminating the Redis command overhead.
+
+The direct communication is implemented using:
+- Exported C functions with the `#[no_mangle]` attribute from the custom hashmap module
+- Dynamic loading of these functions in the session manager using the `libloading` crate
+- A fallback mechanism that uses Redis commands if direct loading fails
 
 ## Building and Running
 
